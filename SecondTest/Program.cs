@@ -5,8 +5,20 @@ using SecondTest.Persistence;
 using SecondTest.Persistence.Interfaces;
 using SecondTest.Services;
 using SecondTest.Services.Interfaces;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+var logFilePath = builder.Configuration["Logging:FilePath"] ?? @"C:\Logs\SecondTest\log-.txt";
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File(
+        logFilePath,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7)
+    .CreateLogger();
 
 // Add services to the container.
 
@@ -43,4 +55,16 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+try
+{
+    Log.Information("SecondTest application started successfully");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "SecondTest application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
