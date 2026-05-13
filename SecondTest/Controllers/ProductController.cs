@@ -16,7 +16,7 @@ namespace SecondTest.Controllers
         }   
 
 
-        [HttpGet("GetById/{id}")]
+        [HttpGet()]
         public async Task<IActionResult> GetProductById(Guid Id)
         {
             var result = await _productService.GetProductByid(Id);
